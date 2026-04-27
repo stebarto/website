@@ -10997,3 +10997,24 @@ header.masthead h3, header.masthead .h3 {
 #portfolio .container-fluid .portfolio-box:hover .portfolio-box-caption, #portfolio .container-sm .portfolio-box:hover .portfolio-box-caption, #portfolio .container-md .portfolio-box:hover .portfolio-box-caption, #portfolio .container-lg .portfolio-box:hover .portfolio-box-caption, #portfolio .container-xl .portfolio-box:hover .portfolio-box-caption, #portfolio .container-xxl .portfolio-box:hover .portfolio-box-caption {
   opacity: 1;
 }
+
+/* Contact button */
+.btn-contact {
+  display: inline-block;
+  background-color: #e26d48;
+  color: #fff;
+  font-family: "Merriweather Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  text-decoration: none;
+  border-radius: 50rem;
+  padding: 0.625rem 1.75rem;
+  transition: background-color 0.2s ease;
+}
+.btn-contact:hover,
+.btn-contact:focus {
+  background-color: #c85a35;
+  color: #fff;
+  text-decoration: none;
+}
