@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>STEBARTO // NEON — Il nuovo sito sta arrivando</title>
+    <meta name="description" content="Stebarto.com si rigenera. Countdown attivo. Neon viola, blocchi in costruzione, qualcosa di grosso in arrivo." />
+    <meta property="og:title" content="STEBARTO // NEON" />
+    <meta property="og:description" content="Il nuovo sito sta arrivando. Countdown attivo." />
+    <meta property="og:type" content="website" />
+    <link rel="icon" type="image/png" href="../assets/img/logo-stebarto.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="neon.css" />
+</head>
+<body>
+
+    <!-- Global chrome -->
+    <div class="progress-bar" id="progress-bar" aria-hidden="true"></div>
+    <div class="cursor-dot" id="cursor-dot" aria-hidden="true"></div>
+    <div class="cursor-ring" id="cursor-ring" aria-hidden="true"></div>
+    <canvas id="particles" aria-hidden="true"></canvas>
+
+    <header class="nav" id="nav">
+        <a class="nav-logo" href="#hero">
+            <img src="../assets/img/logo-stebarto.png" alt="Stebarto" />
+            <span>STEBARTO</span>
+        </a>
+        <nav class="nav-links" aria-label="Sezioni">
+            <a href="#launch">LAUNCH</a>
+            <a href="#sync">SYNC</a>
+            <a href="#arsenal">ARSENAL</a>
+            <a href="#contact">CONTACT</a>
+        </nav>
+    </header>
+
+    <main>
+
+        <!-- ============ HERO ============ -->
+        <section class="hero" id="hero">
+            <div class="hero-layers" aria-hidden="true">
+                <div class="nebula nebula-a" data-parallax="-0.12" data-mouse="14"></div>
+                <div class="nebula nebula-b" data-parallax="-0.18" data-mouse="22"></div>
+                <div class="grid-floor" data-parallax="0.06"></div>
+                <div class="orb orb-1" data-parallax="0.22" data-mouse="38"></div>
+                <div class="orb orb-2" data-parallax="0.30" data-mouse="56"></div>
+                <div class="orb orb-3" data-parallax="0.16" data-mouse="30"></div>
+            </div>
+            <div class="hero-content">
+                <p class="hero-kicker">// SYSTEM REBOOT IN PROGRESS</p>
+                <h1 class="glitch hero-title" data-text="STEBARTO">STEBARTO</h1>
+                <p class="hero-sub"><span id="typewriter" data-full="Il nuovo sito è in costruzione. Blocco dopo blocco."></span><span class="caret" aria-hidden="true"></span></p>
+                <a class="btn-neon" href="#launch">ENTER<span class="btn-sweep" aria-hidden="true"></span></a>
+            </div>
+            <a class="scroll-hint" href="#launch" aria-label="Scorri giù">
+                <span class="chevron" aria-hidden="true"></span>
+            </a>
+        </section>
+
+        <!-- ============ COUNTDOWN ============ -->
+        <section class="launch" id="launch">
+            <div class="section-glow" aria-hidden="true"></div>
+            <h2 class="section-title" data-reveal>LAUNCH <span class="title-dim">//</span> <span class="grad-text">NUOVO SITO IN ARRIVO</span></h2>
+            <p class="section-sub" data-reveal>L'impalcatura sta prendendo forma. Mancano:</p>
+            <div class="countdown" id="countdown" data-reveal role="timer" aria-label="Countdown al lancio del nuovo sito">
+                <div class="count-card">
+                    <span class="count-value" id="cd-days">--</span>
+                    <span class="count-label">GIORNI</span>
+                </div>
+                <div class="count-card">
+                    <span class="count-value" id="cd-hours">--</span>
+                    <span class="count-label">ORE</span>
+                </div>
+                <div class="count-card">
+                    <span class="count-value" id="cd-mins">--</span>
+                    <span class="count-label">MIN</span>
+                </div>
+                <div class="count-card count-card-sec" id="cd-sec-card">
+                    <span class="count-value" id="cd-secs">--</span>
+                    <span class="count-label">SEC</span>
+                </div>
+            </div>
+            <p class="launch-note" data-reveal>// target lock: <span id="launch-date-label" class="mono-neon"></span></p>
+        </section>
+
+        <!-- ============ GIANT CLOCK ============ -->
+        <section class="sync" id="sync">
+            <svg class="analog-ring" id="analog-ring" viewBox="0 0 200 200" aria-hidden="true">
+                <circle cx="100" cy="100" r="96" fill="none" stroke="currentColor" stroke-width="0.6" />
+                <g id="ring-ticks"></g>
+                <line id="ring-hand" x1="100" y1="100" x2="100" y2="12" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" />
+                <circle cx="100" cy="100" r="2.5" fill="currentColor" />
+            </svg>
+            <h2 class="section-title" data-reveal><span class="grad-text">SYNC</span> <span class="title-dim">//</span> ORA LOCALE</h2>
+            <div class="big-clock" data-reveal>
+                <span class="clock-ghost" aria-hidden="true"><span class="digit">8</span><span class="digit">8</span><span class="colon">:</span><span class="digit">8</span><span class="digit">8</span><span class="colon">:</span><span class="digit">8</span><span class="digit">8</span></span>
+                <time class="clock-live" id="big-clock" aria-label="Ora locale corrente">
+                    <span class="digit" data-slot="h1">0</span><span class="digit" data-slot="h2">0</span><span class="colon">:</span><span class="digit" data-slot="m1">0</span><span class="digit" data-slot="m2">0</span><span class="colon">:</span><span class="digit" data-slot="s1">0</span><span class="digit" data-slot="s2">0</span>
+                </time>
+            </div>
+            <p class="clock-date" data-reveal><span id="clock-date" class="mono-neon"></span> <span class="title-dim">//</span> <span id="clock-utc" class="mono-neon"></span></p>
+        </section>
+
+        <!-- ============ ARSENAL ============ -->
+        <section class="arsenal" id="arsenal">
+            <h2 class="section-title" data-reveal>ARSENAL <span class="title-dim">//</span> <span class="grad-text">COSA STA ARRIVANDO</span></h2>
+            <div class="cards">
+                <article class="card" data-reveal data-tilt>
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                        <rect x="3" y="4" width="18" height="14" rx="2" />
+                        <path d="M3 9h18M8 4v5" />
+                        <circle cx="12" cy="13.5" r="2.5" />
+                    </svg>
+                    <h3>PORTFOLIO</h3>
+                    <p>Progetti, esperimenti e lavori selezionati. Tutto quello che ho costruito, in un'unica griglia al neon.</p>
+                </article>
+                <article class="card" data-reveal data-tilt>
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                        <rect x="2" y="7" width="20" height="12" rx="3" />
+                        <path d="M7 11v4M5 13h4" />
+                        <circle cx="16" cy="12" r="1" />
+                        <circle cx="19" cy="14" r="1" />
+                    </svg>
+                    <h3>ARCADE</h3>
+                    <p>La sala giochi del sito: sfide contro la CPU, classifiche e qualche sorpresa retrò. Inserisci un gettone.</p>
+                </article>
+                <article class="card" data-reveal data-tilt>
+                    <svg class="card-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true">
+                        <path d="M9 3h6M10 3v5.5L4.8 17a3 3 0 0 0 2.7 4.5h9a3 3 0 0 0 2.7-4.5L14 8.5V3" />
+                        <path d="M7.5 14h9" />
+                    </svg>
+                    <h3>LAB</h3>
+                    <p>Prototipi instabili, idee in fermentazione e codice che brilla al buio. Entrare a proprio rischio.</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- ============ STATS ============ -->
+        <section class="stats" id="stats">
+            <div class="stats-bg" data-parallax="-0.10" aria-hidden="true"></div>
+            <h2 class="section-title" data-reveal>BY THE <span class="grad-text">NUMBERS</span></h2>
+            <div class="stats-grid">
+                <div class="stat" data-reveal>
+                    <span class="stat-value" data-count="1247">0</span>
+                    <span class="stat-label">BLOCCHI MONTATI</span>
+                </div>
+                <div class="stat" data-reveal>
+                    <span class="stat-value" data-count="312">0</span>
+                    <span class="stat-label">CAFFÈ CONSUMATI</span>
+                </div>
+                <div class="stat" data-reveal>
+                    <span class="stat-value" data-count="99">0</span>
+                    <span class="stat-label">BUG SCHIACCIATI</span>
+                </div>
+                <div class="stat" data-reveal>
+                    <span class="stat-value" data-count="60">0</span>
+                    <span class="stat-label">FPS GARANTITI</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- ============ CONTACT ============ -->
+        <section class="contact" id="contact">
+            <div class="section-glow section-glow-low" aria-hidden="true"></div>
+            <h2 class="section-title" data-reveal><span class="grad-text">OPEN</span> CHANNEL</h2>
+            <p class="section-sub" data-reveal>Vuoi consigliarmi cosa inserire nel nuovo sito, o anche solo mandare un segnale nel vuoto al neon?</p>
+            <a class="btn-neon glitch-hover" href="mailto:stebarto@gmail.com" data-text="TRASMETTI" data-reveal>TRASMETTI<span class="btn-sweep" aria-hidden="true"></span></a>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <a class="nav-logo" href="../">
+            <img src="../assets/img/logo-stebarto.png" alt="Stebarto" />
+        </a>
+        <time class="footer-clock mono-neon" id="footer-clock" aria-label="Ora locale corrente">00:00:00</time>
+        <p class="footer-meta">© 2026 STEBARTO <span class="title-dim">//</span> <a href="../">← torna al sito</a></p>
+    </footer>
+
+    <script src="neon.js"></script>
+</body>
+</html>
