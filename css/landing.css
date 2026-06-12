@@ -307,11 +307,11 @@ main { position: relative; z-index: 1; }
     align-items: center;
     justify-content: center;
     gap: 0.1rem;
-    width: 92px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
     padding: 0.3rem;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 50%;
     border: 2px solid var(--line);
     background: rgba(10, 10, 12, 0.6);
     color: var(--white);
@@ -340,9 +340,9 @@ main { position: relative; z-index: 1; }
 .c-tr { right: calc(10px + env(safe-area-inset-right, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); }
 .ct-fill {
     position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 0%;
-    background: linear-gradient(90deg, transparent, var(--pc));
+    left: 0; right: 0; bottom: 0;
+    height: 0%;
+    background: linear-gradient(0deg, var(--pc), transparent);
     opacity: 0.4;
     pointer-events: none;
 }

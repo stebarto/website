@@ -569,7 +569,7 @@
             var pct = Math.round((c.boost > 0 ? 1 : c.turbo) * 100);
             if (pct !== b.pct) {
                 b.pct = pct;
-                b.fill.style.width = pct + "%";
+                b.fill.style.height = pct + "%"; // fills bottom-up inside the round button
             }
             var ready = c.turbo >= 1 && c.boost <= 0 && state === "race" && !c.finished;
             if (ready !== b.ready) {
