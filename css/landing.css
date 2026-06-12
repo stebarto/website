@@ -294,7 +294,7 @@ main { position: relative; z-index: 1; }
 #race-canvas {
     display: block;
     width: 100%;
-    aspect-ratio: 4 / 3;
+    height: auto; /* keeps the canvas' own aspect, which adapts to the device */
     touch-action: none;
 }
 
@@ -307,11 +307,11 @@ main { position: relative; z-index: 1; }
     align-items: center;
     justify-content: center;
     gap: 0.1rem;
-    width: 92px;
-    height: 64px;
+    width: 80px;
+    height: 80px;
     padding: 0.3rem;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 50%;
     border: 2px solid var(--line);
     background: rgba(10, 10, 12, 0.6);
     color: var(--white);
@@ -323,22 +323,30 @@ main { position: relative; z-index: 1; }
     -webkit-tap-highlight-color: transparent;
 }
 .corner-turbo.show { display: flex; }
-.corner-turbo.ready {
-    box-shadow: 0 0 18px rgba(225, 6, 0, 0.8);
-    animation: turbo-pulse 0.9s ease-in-out infinite;
+.corner-turbo {
+    --pc: #e10600;
+    opacity: 0.8; /* dimmed while charging */
 }
-@keyframes turbo-pulse { 50% { transform: scale(1.07); } }
-.c-bl { left: 10px; bottom: 10px; }
-.c-br { right: 10px; bottom: 10px; }
-.c-tl { left: 10px; top: 10px; }
-.c-tr { right: 10px; top: 10px; }
+.corner-turbo.ready {
+    opacity: 1;
+    border-width: 3px;
+    box-shadow: 0 0 22px var(--pc), inset 0 0 14px var(--pc);
+    animation: turbo-pulse 0.7s ease-in-out infinite;
+}
+@keyframes turbo-pulse { 50% { transform: scale(1.1); } }
+.c-bl { left: calc(10px + env(safe-area-inset-left, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.c-br { right: calc(10px + env(safe-area-inset-right, 0px)); bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+.c-tl { left: calc(10px + env(safe-area-inset-left, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); }
+.c-tr { right: calc(10px + env(safe-area-inset-right, 0px)); top: calc(10px + env(safe-area-inset-top, 0px)); }
 .ct-fill {
     position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 0%;
-    background: linear-gradient(90deg, rgba(225, 6, 0, 0.25), rgba(225, 6, 0, 0.6));
+    left: 0; right: 0; bottom: 0;
+    height: 0%;
+    background: linear-gradient(0deg, var(--pc), transparent);
+    opacity: 0.4;
     pointer-events: none;
 }
+.corner-turbo.ready .ct-fill { opacity: 0.85; }
 .ct-name {
     position: relative;
     font-family: var(--font-hud);
@@ -361,15 +369,13 @@ main { position: relative; z-index: 1; }
     display: flex;
     align-items: center;
     justify-content: center;
-    background: #070907;
+    background: #0e160f; /* same night grass as the track, edge to edge */
     border: none;
 }
 .game-stage.maxi #race-canvas {
-    width: auto;
-    height: 100%;
-    max-width: 100%;
+    width: 100%;
+    height: auto;
     max-height: 100%;
-    margin: 0 auto;
 }
 html.gp-lock, html.gp-lock body { overflow: hidden; }
 
