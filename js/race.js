@@ -115,6 +115,110 @@
         t.stroke();
         t.setLineDash([]);
 
+        /* ----- scenery: stands, sponsors, pits ----- */
+        function place(idx, off) { // off > 0 = outside of the loop
+            var h = wpHeading(idx % N);
+            return {
+                x: WP[idx % N][0] + Math.cos(h - Math.PI / 2) * off,
+                y: WP[idx % N][1] + Math.sin(h - Math.PI / 2) * off,
+                ang: h
+            };
+        }
+
+        var CROWD = ["#e8e8e8", "#e10600", "#ffd200", "#00c2ff", "#7dd87d", "#ff8c42", "#c879ff"];
+
+        function grandstand(idx, len, off, depth) {
+            var p = place(idx, off);
+            t.save();
+            t.translate(p.x, p.y);
+            t.rotate(p.ang);
+            // tiers extend away from the track (local -y)
+            t.fillStyle = "#1a1a20";
+            t.fillRect(-len / 2, -depth, len, depth);
+            t.fillStyle = "#2c2c34";
+            t.fillRect(-len / 2, -depth - 2.5, len, 2.5);
+            for (var row = 0; row < 3; row++) {
+                var ry = -depth + 2.5 + row * 3.9;
+                for (var rx = -len / 2 + 3; rx < len / 2 - 2; rx += 3) {
+                    if (Math.random() < 0.18) continue;
+                    t.fillStyle = CROWD[(Math.random() * CROWD.length) | 0];
+                    t.fillRect(rx + (Math.random() - 0.5), ry + (Math.random() - 0.5), 1.8, 1.8);
+                }
+            }
+            t.fillStyle = "#cfcfcf"; // front fence
+            t.fillRect(-len / 2, 0, len, 1.6);
+            t.restore();
+        }
+
+        function hoarding(from, to, off) {
+            for (var i = from; i <= to; i += 3) {
+                var p = place(i, off);
+                t.save();
+                t.translate(p.x, p.y);
+                t.rotate(p.ang);
+                t.fillStyle = ((i / 3) | 0) % 2 ? "#c21f17" : "#d8d8d8";
+                t.fillRect(-4, -1.5, 8, 3);
+                t.restore();
+            }
+        }
+
+        function grassText(x, y, ang, text, size, alpha) {
+            t.save();
+            t.translate(x, y);
+            t.rotate(ang);
+            t.font = "italic 700 " + size + "px 'Chakra Petch', 'Titillium Web', monospace";
+            t.textAlign = "center";
+            t.textBaseline = "middle";
+            t.fillStyle = "rgba(215,215,222," + alpha + ")";
+            t.fillText(text, 0, 0);
+            t.restore();
+        }
+
+        // stands on the main straight and the bottom corner
+        grandstand(24, 120, TRACK_HALF + 10, 15);
+        grandstand(156, 84, TRACK_HALF + 6, 13);
+        // red/white hoardings on the fast corners
+        hoarding(56, 86, TRACK_HALF + 12);
+        hoarding(120, 144, TRACK_HALF + 12);
+        hoarding(196, 218, TRACK_HALF + 12);
+        // sponsors painted on the infield grass
+        grassText(320, 232, -0.05, "STEBARTO", 24, 0.28);
+        grassText(320, 256, -0.05, "GP 2026", 11, 0.22);
+        grassText(432, 300, 0.5, "CAFFÈ 312", 9, 0.2);
+        grassText(195, 255, -0.6, "ROBOTTINO RACING", 8, 0.2);
+
+        // pit complex, infield by the start line
+        (function pits() {
+            var p = place(N - 16, -(TRACK_HALF + 26));
+            t.save();
+            t.translate(p.x, p.y);
+            t.rotate(p.ang);
+            // apron with bay markings
+            t.fillStyle = "#33333a";
+            t.fillRect(-28, -12, 56, 12);
+            t.strokeStyle = "rgba(220,220,225,0.4)";
+            t.lineWidth = 1;
+            for (var b = -28; b <= 28; b += 14) {
+                t.beginPath(); t.moveTo(b, -12); t.lineTo(b, 0); t.stroke();
+            }
+            // garage with red roof trim
+            t.fillStyle = "#1d1d24";
+            t.fillRect(-28, 0, 56, 16);
+            t.fillStyle = "#c21f17";
+            t.fillRect(-28, 0, 56, 2.5);
+            // parked cars in two bays
+            t.fillStyle = "#55555f";
+            t.fillRect(-24, -9, 10, 5);
+            t.fillStyle = "#7a2a26";
+            t.fillRect(4, -9, 10, 5);
+            // label
+            t.font = "700 7px 'Chakra Petch', monospace";
+            t.textAlign = "center";
+            t.fillStyle = "rgba(230,230,235,0.75)";
+            t.fillText("PIT", 0, 11.5);
+            t.restore();
+        })();
+
         // start / finish checkers across the track at WP[0]
         var h = wpHeading(0), px = Math.cos(h + Math.PI / 2), py = Math.sin(h + Math.PI / 2);
         var sq = 6;
@@ -134,10 +238,20 @@
     })();
 
     /* ---------- Cars ---------- */
-    function makeCar(color, isPlayer, skill, laneOffset) {
+    function shade(hex, f) {
+        var n = parseInt(hex.slice(1), 16);
+        var r = Math.min(255, Math.round(((n >> 16) & 255) * f));
+        var g = Math.min(255, Math.round(((n >> 8) & 255) * f));
+        var b = Math.min(255, Math.round((n & 255) * f));
+        return "rgb(" + r + "," + g + "," + b + ")";
+    }
+
+    function makeCar(color, helmet, isPlayer, skill, laneOffset) {
         return {
-            color: color, isPlayer: isPlayer, skill: skill, laneOffset: laneOffset,
-            x: 0, y: 0, heading: 0, speed: 0,
+            color: color, dark: shade(color, 0.55), lite: shade(color, 1.6),
+            helmet: helmet,
+            isPlayer: isPlayer, skill: skill, laneOffset: laneOffset,
+            x: 0, y: 0, heading: 0, speed: 0, slip: 0,
             wpIdx: 0, lap: 0, prevIdx: 0,
             lapStart: 0, lastLap: null, bestLap: null, finished: false, finishTime: 0
         };
@@ -186,6 +300,63 @@
     canvas.addEventListener("pointerup", endTouch);
     canvas.addEventListener("pointercancel", endTouch);
 
+    /* ---------- Hazards: oil slicks & mud patches ---------- */
+    var hazards = [], marks = [];
+    var hazardTimer = 0;
+
+    function spawnHazard() {
+        if (hazards.length >= 4) return;
+        for (var tries = 0; tries < 12; tries++) {
+            var idx = 20 + Math.floor(Math.random() * (N - 40)); // never on the start line
+            var h = wpHeading(idx);
+            var lat = (Math.random() * 2 - 1) * (TRACK_HALF - 13);
+            var x = WP[idx][0] + Math.cos(h + Math.PI / 2) * lat;
+            var y = WP[idx][1] + Math.sin(h + Math.PI / 2) * lat;
+            var ok = true, i, dx, dy;
+            for (i = 0; i < hazards.length && ok; i++) {
+                dx = x - hazards[i].x; dy = y - hazards[i].y;
+                if (dx * dx + dy * dy < 70 * 70) ok = false;
+            }
+            for (i = 0; i < cars.length && ok; i++) {
+                dx = x - cars[i].x; dy = y - cars[i].y;
+                if (dx * dx + dy * dy < 60 * 60) ok = false;
+            }
+            if (!ok) continue;
+            hazards.push({
+                x: x, y: y, r: 11 + Math.random() * 4,
+                type: Math.random() < 0.5 ? "oil" : "mud",
+                age: 0, ttl: 16 + Math.random() * 6, seed: Math.random() * 7
+            });
+            return;
+        }
+    }
+
+    function updateHazards(dt) {
+        hazardTimer -= dt;
+        if (hazardTimer <= 0) {
+            spawnHazard();
+            hazardTimer = 6 + Math.random() * 6;
+        }
+        for (var i = hazards.length - 1; i >= 0; i--) {
+            hazards[i].age += dt;
+            if (hazards[i].age >= hazards[i].ttl) hazards.splice(i, 1);
+        }
+        for (var j = marks.length - 1; j >= 0; j--) {
+            marks[j].ttl -= dt;
+            if (marks[j].ttl <= 0) marks.splice(j, 1);
+        }
+    }
+
+    function dropMark(c, type) {
+        if (marks.length > 400) marks.shift();
+        var bx = c.x - Math.cos(c.heading) * 9.5;
+        var by = c.y - Math.sin(c.heading) * 9.5;
+        var px = Math.cos(c.heading + Math.PI / 2) * 6.8;
+        var py = Math.sin(c.heading + Math.PI / 2) * 6.8;
+        marks.push({ x: bx + px, y: by + py, type: type, ttl: 6 });
+        marks.push({ x: bx - px, y: by - py, type: type, ttl: 6 });
+    }
+
     /* ---------- Race state ---------- */
     var state = "idle";      // idle | countdown | race | paused | finished
     var countdownT = 0;
@@ -208,10 +379,10 @@
 
     function startRace() {
         cars = [
-            makeCar("#f2f2f2", false, 0.88, -14),
-            makeCar("#ffd200", false, 0.93, 14),
-            makeCar("#00c2ff", false, 0.97, -14),
-            (player = makeCar("#e10600", true, 1, 14))
+            makeCar("#f2f2f2", "#e10600", false, 0.88, -14),
+            makeCar("#ffd200", "#101014", false, 0.93, 14),
+            makeCar("#00c2ff", "#f2f2f2", false, 0.97, -14),
+            (player = makeCar("#e10600", "#f5f5f5", true, 1, 14))
         ];
         // 2x2 grid behind the start line
         for (var i = 0; i < cars.length; i++) {
@@ -228,6 +399,9 @@
             c.lap = -1; // becomes 0 when crossing the line at lights-out
         }
         raceTime = 0;
+        hazards = [];
+        marks = [];
+        hazardTimer = 5;
         countdownT = 3.6;
         state = "countdown";
         overlay.classList.add("hidden");
@@ -289,8 +463,27 @@
             c.speed += (GRASS_SPEED - c.speed) * Math.min(1, dt * 4);
         }
 
+        // hazards: oil makes you slide, mud bogs you down
+        c.slip = Math.max(0, c.slip - dt);
+        var inMud = false;
+        for (var hz = 0; hz < hazards.length; hz++) {
+            var hzd = hazards[hz];
+            var hdx = c.x - hzd.x, hdy = c.y - hzd.y;
+            var rr = hzd.r + 5;
+            if (hdx * hdx + hdy * hdy > rr * rr) continue;
+            if (hzd.type === "oil") c.slip = Math.max(c.slip, 0.55);
+            else inMud = true;
+        }
+        if (inMud) {
+            if (c.speed > 85) c.speed += (85 - c.speed) * Math.min(1, dt * 5);
+            if (c.speed > 40) dropMark(c, "mud");
+        }
+        if (c.slip > 0 && c.speed > 50) dropMark(c, "skid");
+
         var grip = Math.min(1, c.speed / 60);
-        c.heading += steer * 3.0 * grip * dt;
+        var control = c.slip > 0 ? 0.12 : 1;
+        c.heading += steer * 3.0 * grip * control * dt;
+        if (c.slip > 0) c.heading += (Math.random() - 0.5) * 3.2 * dt;
         c.x += Math.cos(c.heading) * c.speed * dt;
         c.y += Math.sin(c.heading) * c.speed * dt;
         c.x = Math.max(8, Math.min(W - 8, c.x));
@@ -356,42 +549,87 @@
     }
 
     /* ---------- Drawing ---------- */
+    function poly(points) {
+        ctx.beginPath();
+        ctx.moveTo(points[0], points[1]);
+        for (var i = 2; i < points.length; i += 2) ctx.lineTo(points[i], points[i + 1]);
+        ctx.closePath();
+        ctx.fill();
+    }
+
     function drawCar(c) {
         ctx.save();
         ctx.translate(c.x, c.y);
         ctx.rotate(c.heading);
 
-        // shadow
-        ctx.fillStyle = "rgba(0,0,0,0.4)";
-        ctx.fillRect(-13, -5, 26, 11);
-
-        // wheels
-        ctx.fillStyle = "#0c0c0e";
-        ctx.fillRect(-11, -7, 5, 3.5);
-        ctx.fillRect(-11, 3.5, 5, 3.5);
-        ctx.fillRect(6, -7, 5, 3.5);
-        ctx.fillRect(6, 3.5, 5, 3.5);
-
-        // body
-        ctx.fillStyle = c.color;
+        // soft shadow
+        ctx.fillStyle = "rgba(0,0,0,0.35)";
         ctx.beginPath();
-        ctx.moveTo(13, 0);          // nose
-        ctx.lineTo(6, -3.2);
-        ctx.lineTo(-7, -3.6);
-        ctx.lineTo(-11, -2);
-        ctx.lineTo(-11, 2);
-        ctx.lineTo(-7, 3.6);
-        ctx.lineTo(6, 3.2);
-        ctx.closePath();
+        ctx.ellipse(-0.5, 0.8, 15, 7.2, 0, 0, Math.PI * 2);
         ctx.fill();
 
-        // wings
-        ctx.fillRect(11, -5.5, 2.5, 11);   // front
-        ctx.fillRect(-13.5, -5, 3, 10);    // rear
+        // tyres
+        ctx.fillStyle = "#0b0b0d";
+        ctx.fillRect(6.2, -8.3, 4.6, 3.2);    // front L
+        ctx.fillRect(6.2, 5.1, 4.6, 3.2);     // front R
+        ctx.fillRect(-12.4, -8.7, 5.4, 3.6);  // rear L
+        ctx.fillRect(-12.4, 5.1, 5.4, 3.6);   // rear R
+        ctx.fillStyle = "#41414b";            // hubs
+        ctx.fillRect(7.7, -7.4, 1.6, 1.4);
+        ctx.fillRect(7.7, 6.0, 1.6, 1.4);
+        ctx.fillRect(-10.6, -7.6, 1.8, 1.4);
+        ctx.fillRect(-10.6, 6.2, 1.8, 1.4);
 
-        // cockpit
+        // front wing with colored endplates
+        ctx.fillStyle = c.dark;
+        ctx.fillRect(12.4, -7.2, 2.6, 14.4);
+        ctx.fillStyle = c.color;
+        ctx.fillRect(12.4, -7.2, 2.6, 1.7);
+        ctx.fillRect(12.4, 5.5, 2.6, 1.7);
+
+        // rear wing, colored leading edge
         ctx.fillStyle = "#101014";
-        ctx.fillRect(-3, -1.8, 6, 3.6);
+        ctx.fillRect(-15, -6.4, 3.4, 12.8);
+        ctx.fillStyle = c.color;
+        ctx.fillRect(-15, -6.4, 1.2, 12.8);
+
+        // floor / lower body (darker tone)
+        ctx.fillStyle = c.dark;
+        poly([15, 0, 9, -2.4, 5, -2.8, 2.5, -5.6, -5, -6, -9.5, -4.2, -13, -3.4,
+              -13, 3.4, -9.5, 4.2, -5, 6, 2.5, 5.6, 5, 2.8, 9, 2.4]);
+
+        // upper body (main livery)
+        ctx.fillStyle = c.color;
+        poly([15, 0, 9, -1.6, 4, -2, 1.5, -4.2, -5, -4.6, -10, -2.7, -12.6, -2.2,
+              -12.6, 2.2, -10, 2.7, -5, 4.6, 1.5, 4.2, 4, 2, 9, 1.6]);
+
+        // nose highlight stripe
+        ctx.fillStyle = c.lite;
+        poly([15, 0, 8.5, -0.9, 8.5, 0.9]);
+
+        // sidepod intakes
+        ctx.fillStyle = "rgba(0,0,0,0.5)";
+        ctx.fillRect(1.0, -5.0, 1.7, 2.2);
+        ctx.fillRect(1.0, 2.8, 1.7, 2.2);
+
+        // engine cover fin
+        ctx.fillStyle = c.dark;
+        ctx.fillRect(-9.5, -0.55, 5.5, 1.1);
+
+        // cockpit + halo + helmet
+        ctx.fillStyle = "#0d0d11";
+        ctx.beginPath();
+        ctx.ellipse(1.6, 0, 3.3, 2.0, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = c.helmet;
+        ctx.beginPath();
+        ctx.arc(0.9, 0, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = "#34343e";
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        ctx.arc(0.9, 0, 2.6, -1.1, 1.1);
+        ctx.stroke();
 
         ctx.restore();
     }
@@ -410,9 +648,60 @@
         ctx.restore();
     }
 
+    function drawHazard(h) {
+        var a = Math.min(1, h.age * 2, (h.ttl - h.age) / 2.5);
+        ctx.save();
+        ctx.translate(h.x, h.y);
+        ctx.rotate(h.seed);
+        if (h.type === "oil") {
+            ctx.globalAlpha = a * 0.85;
+            ctx.fillStyle = "#07070b";
+            ctx.beginPath();
+            ctx.ellipse(0, 0, h.r, h.r * 0.7, 0, 0, Math.PI * 2);
+            ctx.ellipse(h.r * 0.5, h.r * 0.3, h.r * 0.55, h.r * 0.4, 0.6, 0, Math.PI * 2);
+            ctx.ellipse(-h.r * 0.45, -h.r * 0.25, h.r * 0.5, h.r * 0.35, -0.4, 0, Math.PI * 2);
+            ctx.fill();
+            // iridescent sheen
+            ctx.globalAlpha = a * 0.3;
+            ctx.strokeStyle = "#7d8fc9";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.ellipse(-1, -1, h.r * 0.55, h.r * 0.35, 0.5, 0, Math.PI * 2);
+            ctx.stroke();
+        } else {
+            ctx.globalAlpha = a * 0.9;
+            ctx.fillStyle = "#4a3520";
+            ctx.beginPath();
+            ctx.ellipse(0, 0, h.r, h.r * 0.75, 0, 0, Math.PI * 2);
+            ctx.ellipse(h.r * 0.45, -h.r * 0.2, h.r * 0.5, h.r * 0.4, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = "#362615";
+            ctx.beginPath();
+            ctx.ellipse(-h.r * 0.2, h.r * 0.15, h.r * 0.45, h.r * 0.3, -0.3, 0, Math.PI * 2);
+            ctx.fill();
+            // splatter dots
+            ctx.fillStyle = "#4a3520";
+            for (var s = 0; s < 5; s++) {
+                var sa = h.seed * 3 + s * 1.26;
+                ctx.fillRect(Math.cos(sa) * (h.r + 4), Math.sin(sa) * (h.r * 0.8 + 3), 2, 2);
+            }
+        }
+        ctx.restore();
+        ctx.globalAlpha = 1;
+    }
+
     function draw() {
         ctx.drawImage(trackLayer, 0, 0);
-        for (var i = 0; i < cars.length; i++) drawCar(cars[i]);
+        var i;
+        for (i = 0; i < marks.length; i++) {
+            var mk = marks[i];
+            ctx.fillStyle = mk.type === "mud" ? "rgba(74,53,32,0.55)" : "rgba(12,12,16,0.5)";
+            ctx.globalAlpha = Math.min(1, mk.ttl / 3);
+            ctx.fillRect(mk.x - 1, mk.y - 1, 2.4, 2.4);
+        }
+        ctx.globalAlpha = 1;
+        for (i = 0; i < hazards.length; i++) drawHazard(hazards[i]);
+        for (i = 0; i < cars.length; i++) drawCar(cars[i]);
         if (state === "countdown") drawCountdown();
         if (state === "paused") {
             ctx.fillStyle = "rgba(5,5,7,0.55)";
@@ -437,6 +726,7 @@
             if (countdownT <= 0) state = "race";
         } else if (state === "race") {
             raceTime += dt * 1000;
+            updateHazards(dt);
             for (var j = 0; j < cars.length; j++) stepCar(cars[j], dt);
             collide();
         }
