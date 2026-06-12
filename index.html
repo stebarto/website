@@ -39,9 +39,8 @@
                 <span class="hero-line hero-line-red">STOP<span class="hero-cursor" aria-hidden="true"></span></span>
             </h1>
             <p class="hero-lead">
-                Sto rimontando il mio sito personale pezzo per pezzo:
-                veloce, ma fatto bene. Nel frattempo il motore è caldo —
-                scendi in pista e segna il giro veloce.
+                Il sito è ai box, i meccanici sono al lavoro.
+                Tu intanto scalda le gomme: c'è un giro veloce da segnare.
             </p>
             <div class="hero-cta">
                 <a class="btn btn-red" href="#gara">🏁 SCENDI IN PISTA</a>
@@ -81,7 +80,7 @@
                             <h3 id="overlay-title">GRAN PREMIO</h3>
                             <p class="overlay-msg" id="overlay-msg">3 giri contro la CPU.<br />Occhio a olio, fango ed erba.</p>
                             <button class="btn btn-red" id="start-btn">▶ START</button>
-                            <p class="overlay-hint">←/→ sterza · ↑ gas · ↓ freno · touch ok</p>
+                            <p class="overlay-hint">←/→ sterza · ↑ gas · ↓ freno · touch: pulsanti ◀ ▶</p>
                         </div>
                     </div>
                     <div class="hud" id="hud" aria-hidden="true">
@@ -89,6 +88,11 @@
                         <span id="hud-pos">POS 4/4</span>
                         <span id="hud-time">0:00.0</span>
                     </div>
+                </div>
+
+                <div class="touch-controls">
+                    <button class="touch-btn" id="btn-left" aria-label="Sterza a sinistra">◀</button>
+                    <button class="touch-btn" id="btn-right" aria-label="Sterza a destra">▶</button>
                 </div>
 
                 <aside class="game-side">
@@ -113,7 +117,7 @@
                             <li><kbd>↑</kbd> o <kbd>W</kbd> acceleratore</li>
                             <li><kbd>↓</kbd> o <kbd>S</kbd> freno</li>
                             <li><kbd>P</kbd> pausa · <kbd>R</kbd> restart</li>
-                            <li>📱 touch: sinistra/destra dello schermo</li>
+                            <li>📱 touch: pulsanti ◀ ▶, gas automatico</li>
                         </ul>
                     </div>
                 </aside>

@@ -286,21 +286,51 @@
     });
     document.addEventListener("keyup", function (e) { keys[e.key.toLowerCase()] = false; });
 
-    canvas.addEventListener("pointerdown", function (e) {
-        if (state !== "race") return;
-        touchActive = true;
+    // touch: visible ◀ ▶ buttons and the canvas halves all steer; any
+    // held pointer doubles as throttle
+    var touchPointers = {};
+
+    function applyTouch() {
+        var l = false, r = false;
+        for (var k in touchPointers) {
+            if (touchPointers[k] < 0) l = true; else r = true;
+        }
+        touchSteer = (r ? 1 : 0) - (l ? 1 : 0);
+        touchActive = l || r;
+    }
+
+    function bindTouchSurface(el, sideFor) {
+        el.addEventListener("pointerdown", function (e) {
+            if (state !== "race") return;
+            e.preventDefault();
+            touchPointers[e.pointerId] = sideFor(e);
+            applyTouch();
+            try { el.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+        });
+        el.addEventListener("pointermove", function (e) {
+            if (!(e.pointerId in touchPointers)) return;
+            touchPointers[e.pointerId] = sideFor(e);
+            applyTouch();
+        });
+        function end(e) {
+            delete touchPointers[e.pointerId];
+            applyTouch();
+        }
+        el.addEventListener("pointerup", end);
+        el.addEventListener("pointercancel", end);
+    }
+
+    bindTouchSurface(canvas, function (e) {
         var r = canvas.getBoundingClientRect();
-        touchSteer = (e.clientX - r.left) < r.width / 2 ? -1 : 1;
-        canvas.setPointerCapture(e.pointerId);
+        return (e.clientX - r.left) < r.width / 2 ? -1 : 1;
     });
-    canvas.addEventListener("pointermove", function (e) {
-        if (!touchActive) return;
-        var r = canvas.getBoundingClientRect();
-        touchSteer = (e.clientX - r.left) < r.width / 2 ? -1 : 1;
+    bindTouchSurface(document.getElementById("btn-left"), function () { return -1; });
+    bindTouchSurface(document.getElementById("btn-right"), function () { return 1; });
+
+    // long-press on the stage must not open the context menu / select the canvas
+    document.querySelector(".game-stage").addEventListener("contextmenu", function (e) {
+        e.preventDefault();
     });
-    function endTouch() { touchActive = false; touchSteer = 0; }
-    canvas.addEventListener("pointerup", endTouch);
-    canvas.addEventListener("pointercancel", endTouch);
 
     /* ---------- Hazards: oil slicks & mud patches ---------- */
     var hazards = [], marks = [];
@@ -410,6 +440,8 @@
         hud.classList.add("on");
         statLast.textContent = "—";
         keys = {};
+        touchPointers = {};
+        applyTouch();
     }
 
     function togglePause() {
