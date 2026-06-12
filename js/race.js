@@ -30,7 +30,7 @@
         [430, 380], [330, 350], [240, 400], [130, 415], [65, 320], [85, 200]
     ];
 
-    var WP = [];           // sampled centerline waypoints
+    var WP = [];          // sampled centerline waypoints
     (function sample() {
         var n = CONTROL.length, perSeg = 22;
         for (var i = 0; i < n; i++) {
@@ -45,6 +45,8 @@
             }
         }
     })();
+    // rotate so WP[0] (start/finish, grid, lap counting) sits mid main straight
+    WP = WP.slice(24).concat(WP.slice(0, 24));
     var N = WP.length;
 
     function wpHeading(i) {
@@ -174,22 +176,22 @@
             t.restore();
         }
 
-        // stands on the main straight and the bottom corner
-        grandstand(24, 120, TRACK_HALF + 10, 15);
-        grandstand(156, 84, TRACK_HALF + 6, 13);
+        // stands overlooking the finish line and the bottom corner
+        grandstand(0, 120, TRACK_HALF + 10, 15);
+        grandstand(132, 84, TRACK_HALF + 6, 13);
         // red/white hoardings on the fast corners
-        hoarding(56, 86, TRACK_HALF + 12);
-        hoarding(120, 144, TRACK_HALF + 12);
-        hoarding(196, 218, TRACK_HALF + 12);
+        hoarding(32, 62, TRACK_HALF + 12);
+        hoarding(96, 120, TRACK_HALF + 12);
+        hoarding(172, 194, TRACK_HALF + 12);
         // sponsors painted on the infield grass
         grassText(320, 232, -0.05, "STEBARTO", 24, 0.28);
         grassText(320, 256, -0.05, "GP 2026", 11, 0.22);
         grassText(432, 300, 0.5, "CAFFÈ 312", 9, 0.2);
         grassText(195, 255, -0.6, "ROBOTTINO RACING", 8, 0.2);
 
-        // pit complex, infield by the start line
+        // pit complex on the infield, aligned with the main straight
         (function pits() {
-            var p = place(N - 16, -(TRACK_HALF + 26));
+            var p = place(N - 6, -(TRACK_HALF + 18));
             t.save();
             t.translate(p.x, p.y);
             t.rotate(p.ang);
