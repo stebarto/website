@@ -1,0 +1,18 @@
+{
+    "name": "Stebarto GP",
+    "short_name": "Stebarto GP",
+    "description": "Disegna la traiettoria, gestisci il turbo. Fino a 4 giocatori.",
+    "start_url": "/",
+    "display": "fullscreen",
+    "orientation": "landscape",
+    "background_color": "#0a0a0c",
+    "theme_color": "#0a0a0c",
+    "icons": [
+        {
+            "src": "assets/img/logo-stebarto.png",
+            "sizes": "500x500",
+            "type": "image/png",
+            "purpose": "any"
+        }
+    ]
+}

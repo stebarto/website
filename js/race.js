@@ -38,8 +38,24 @@
         [215, 175], [80, 168]                 // hairpin back to the left edge
     ];
 
-    var WP = [];          // sampled centerline waypoints
-    (function sample() {
+    var WP, N, CURV;
+    var trackLayer = document.createElement("canvas");
+
+    function wpHeading(i) {
+        var a = WP[i % N], b = WP[(i + 1) % N];
+        return Math.atan2(b[1] - a[1], b[0] - a[0]);
+    }
+
+    // rebuild the whole world geometry for a given canvas width: the
+    // control points stretch horizontally so the track fills the screen
+    function rebuildWorld(width) {
+        W = Math.round(width);
+        H = 480;
+        canvas.width = W;
+        canvas.height = H;
+        var sx = W / 640;
+
+        WP = [];
         var n = CONTROL.length, perSeg = 22;
         for (var i = 0; i < n; i++) {
             var p0 = CONTROL[(i - 1 + n) % n], p1 = CONTROL[i];
@@ -47,35 +63,29 @@
             for (var j = 0; j < perSeg; j++) {
                 var t = j / perSeg, t2 = t * t, t3 = t2 * t;
                 WP.push([
-                    0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
+                    sx * 0.5 * ((2 * p1[0]) + (-p0[0] + p2[0]) * t + (2 * p0[0] - 5 * p1[0] + 4 * p2[0] - p3[0]) * t2 + (-p0[0] + 3 * p1[0] - 3 * p2[0] + p3[0]) * t3),
                     0.5 * ((2 * p1[1]) + (-p0[1] + p2[1]) * t + (2 * p0[1] - 5 * p1[1] + 4 * p2[1] - p3[1]) * t2 + (-p0[1] + 3 * p1[1] - 3 * p2[1] + p3[1]) * t3)
                 ]);
             }
         }
-    })();
-    // rotate so WP[0] (start/finish, grid, lap counting) sits mid main straight
-    WP = WP.slice(28).concat(WP.slice(0, 28));
-    var N = WP.length;
+        // rotate so WP[0] (start/finish, grid, lap counting) sits mid main straight
+        WP = WP.slice(28).concat(WP.slice(0, 28));
+        N = WP.length;
 
-    function wpHeading(i) {
-        var a = WP[i % N], b = WP[(i + 1) % N];
-        return Math.atan2(b[1] - a[1], b[0] - a[0]);
+        // curvature per waypoint (heading change over a small window), for CPU corner speed
+        CURV = [];
+        for (i = 0; i < N; i++) {
+            var h1 = wpHeading((i + N - 4) % N), h2 = wpHeading((i + 4) % N);
+            CURV.push(Math.abs(Math.atan2(Math.sin(h2 - h1), Math.cos(h2 - h1))));
+        }
+
+        trackLayer.width = W;
+        trackLayer.height = H;
+        paintTrack(sx);
     }
 
-    // curvature per waypoint (heading change over a small window), for CPU corner speed
-    var CURV = [];
-    (function () {
-        for (var i = 0; i < N; i++) {
-            var h1 = wpHeading((i + N - 4) % N), h2 = wpHeading((i + 4) % N);
-            var d = Math.abs(Math.atan2(Math.sin(h2 - h1), Math.cos(h2 - h1)));
-            CURV.push(d);
-        }
-    })();
-
     /* ---------- Pre-rendered track layer ---------- */
-    var trackLayer = document.createElement("canvas");
-    trackLayer.width = W; trackLayer.height = H;
-    (function paintTrack() {
+    function paintTrack(sx) {
         var t = trackLayer.getContext("2d");
 
         // night grass
@@ -192,10 +202,10 @@
         hoarding(104, 146, TRACK_HALF + 12);
         hoarding(214, 236, TRACK_HALF + 12);
         // sponsors painted on the infield grass
-        grassText(420, 218, -0.05, "STEBARTO", 20, 0.28);
-        grassText(420, 242, -0.05, "GP 2026", 11, 0.22);
-        grassText(420, 264, -0.05, "ROBOTTINO RACING", 8, 0.2);
-        grassText(336, 318, 0.25, "CAFFÈ 312", 9, 0.2);
+        grassText(420 * sx, 218, -0.05, "STEBARTO", 20, 0.28);
+        grassText(420 * sx, 242, -0.05, "GP 2026", 11, 0.22);
+        grassText(420 * sx, 264, -0.05, "ROBOTTINO RACING", 8, 0.2);
+        grassText(336 * sx, 318, 0.25, "CAFFÈ 312", 9, 0.2);
 
         // pit complex on the infield, aligned with the main straight
         (function pits() {
@@ -245,7 +255,9 @@
                 t.restore();
             }
         }
-    })();
+    }
+
+    rebuildWorld(640);
 
     /* ---------- Cars ---------- */
     function shade(hex, f) {
@@ -277,7 +289,7 @@
             wpIdx: 0, lap: 0, prevIdx: 0,
             lapStart: 0, lastLap: null, bestLap: null,
             finished: false, finishTime: 0, finalPos: 0,
-            path: null, dist: 0, lineOff: 0, turbo: 0, boost: 0
+            path: null, dist: 0, lineOff: 0, off: 0, turbo: 0, boost: 0
         };
     }
 
@@ -401,23 +413,25 @@
             sm.push(pts[pts.length - 1]);
             pts = sm;
         }
-        // resample at fixed arc-length steps
+        // resample into a perfectly uniform closed loop (an uneven seam at
+        // the closure point caused a visible glitch every finish-line pass)
         var cum = [0];
         for (i = 1; i < pts.length; i++) {
             cum.push(cum[i - 1] + Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]));
         }
         var total = cum[cum.length - 1];
         if (total < 200) return null;
+        var M = Math.max(40, Math.round(total / PATH_STEP));
+        var step = total / M;
         var X = [], Y = [], j = 1;
-        for (var s = 0; s < total; s += PATH_STEP) {
+        for (var si = 0; si < M; si++) {
+            var s = si * step;
             while (cum[j] < s) j++;
             var seg = cum[j] - cum[j - 1] || 1;
             var t = (s - cum[j - 1]) / seg;
             X.push(pts[j - 1][0] + (pts[j][0] - pts[j - 1][0]) * t);
             Y.push(pts[j - 1][1] + (pts[j][1] - pts[j - 1][1]) * t);
         }
-        var M = X.length;
-        if (M < 40) return null;
         var TX = [], TY = [], K = [];
         for (i = 0; i < M; i++) {
             var ax = X[(i + 1) % M] - X[(i - 1 + M) % M];
@@ -429,21 +443,29 @@
             var bx = TX[(i + 1) % M], by = TY[(i + 1) % M];
             var cross = TX[i] * by - TY[i] * bx;
             var dot = TX[i] * bx + TY[i] * by;
-            K.push(Math.atan2(cross, Math.max(-1, Math.min(1, dot))) / PATH_STEP); // signed rad/px
+            K.push(Math.atan2(cross, Math.max(-1, Math.min(1, dot))) / step); // signed rad/px
+        }
+        // smoothed signed curvature: the raw sign flips noisily on straights,
+        // which made the understeer offset jump side to side (car glitches)
+        var SK = [];
+        for (i = 0; i < M; i++) {
+            var acc = 0;
+            for (var w = -4; w <= 4; w++) acc += K[(i + w + M) % M];
+            SK.push(acc / 9);
         }
         // corner-safe speed, then anticipatory braking (two wrap passes)
         var SAFE = [];
         for (i = 0; i < M; i++) {
-            var k = Math.abs(K[i]);
+            var k = Math.abs(SK[i]);
             SAFE.push(Math.min(VMAX, Math.sqrt(LATG / Math.max(k, 0.0008))));
         }
         for (var p2 = 0; p2 < 2; p2++) {
             for (i = M - 1; i >= 0; i--) {
                 var nx = SAFE[(i + 1) % M];
-                SAFE[i] = Math.min(SAFE[i], Math.sqrt(nx * nx + 2 * BRAKE * PATH_STEP));
+                SAFE[i] = Math.min(SAFE[i], Math.sqrt(nx * nx + 2 * BRAKE * step));
             }
         }
-        return { x: X, y: Y, tx: TX, ty: TY, curv: K, safe: SAFE, M: M, len: total };
+        return { x: X, y: Y, tx: TX, ty: TY, scurv: SK, safe: SAFE, M: M, step: step, len: total };
     }
 
     // validate that the line goes around the circuit in race direction
@@ -524,6 +546,7 @@
                 info: el.querySelector(".ct-info"),
                 pct: -1, ready: false, txt: ""
             };
+            el.style.setProperty("--pc", LIVERY[i].color);
             el.style.borderColor = LIVERY[i].color;
             el.querySelector(".ct-name").style.color = LIVERY[i].color;
             (function (idx) {
@@ -555,7 +578,9 @@
             }
             var txt = c.finished
                 ? (c.finalPos + "°  🏁")
-                : ("L" + Math.min(LAPS, Math.max(1, c.lap + 1)) + "/" + LAPS + " · " + racePos(c) + "°");
+                : (ready
+                    ? "⚡ PRONTO!"
+                    : ("L" + Math.min(LAPS, Math.max(1, c.lap + 1)) + "/" + LAPS + " · " + racePos(c) + "°"));
             if (txt !== b.txt) {
                 b.txt = txt;
                 b.info.textContent = txt;
@@ -673,6 +698,7 @@
             c.speed = 0;
             c.dist = 0;
             c.lineOff = 0;
+            c.off = 0;
             c.turbo = 0.6;
             c.boost = 0;
             c.finished = false;
@@ -687,6 +713,11 @@
     }
 
     function startGame(n) {
+        // stretch the circuit to the device's landscape aspect ratio
+        var landW = Math.max(window.innerWidth, window.innerHeight);
+        var landH = Math.min(window.innerWidth, window.innerHeight) || 1;
+        var aspect = Math.min(2.1, Math.max(4 / 3, landW / landH));
+        rebuildWorld(480 * aspect);
         buildCars(n);
         hazards = [];
         marks = [];
@@ -878,7 +909,7 @@
     function stepHuman(c, dt) {
         var path = c.path;
         var M = path.M;
-        var idx = Math.floor(c.dist / PATH_STEP) % M;
+        var idx = Math.floor(c.dist / path.step) % M;
 
         // turbo charge / boost
         if (c.boost > 0) c.boost -= dt;
@@ -901,10 +932,11 @@
         else c.speed = Math.max(target, c.speed - BRAKE * dt);
 
         c.dist += c.speed * dt;
+        if (c.dist >= path.len) c.dist -= path.len;
 
         // base position on the drawn line
-        idx = Math.floor(c.dist / PATH_STEP) % M;
-        var frac = (c.dist % PATH_STEP) / PATH_STEP;
+        idx = Math.floor(c.dist / path.step) % M;
+        var frac = (c.dist - idx * path.step) / path.step;
         var nx = (idx + 1) % M;
         var bx = path.x[idx] + (path.x[nx] - path.x[idx]) * frac;
         var by = path.y[idx] + (path.y[nx] - path.y[idx]) * frac;
@@ -912,15 +944,19 @@
 
         // understeer: too fast for the line (turbo!) pushes the car wide
         var excess = c.speed - safe * 1.05;
-        if (excess > 0) c.lineOff += excess * 1.5 * dt;
-        else c.lineOff = Math.max(0, c.lineOff - c.lineOff * 3 * dt - 6 * dt);
+        if (excess > 0) c.lineOff = Math.min(26, c.lineOff + excess * 1.5 * dt);
+        else c.lineOff = Math.max(0, c.lineOff - (c.lineOff * 3 + 6) * dt);
         if (c.slip > 0) c.lineOff = Math.min(26, c.lineOff + 40 * dt);
-        c.lineOff = Math.min(26, c.lineOff);
-        var outward = -(path.curv[idx] >= 0 ? 1 : -1) * c.lineOff;
 
-        c.x = bx + (-ty) * outward;
-        c.y = by + tx * outward;
-        c.heading = Math.atan2(ty, tx) + outward * 0.012;
+        // ease the lateral offset toward the outside of the (smoothed)
+        // curve instead of snapping side to side
+        var sk = path.scurv[idx];
+        var side = Math.abs(sk) < 0.0015 ? 0 : (sk > 0 ? -1 : 1);
+        c.off += (side * c.lineOff - c.off) * Math.min(1, dt * 6);
+
+        c.x = bx + (-ty) * c.off;
+        c.y = by + tx * c.off;
+        c.heading = Math.atan2(ty, tx) + c.off * 0.012;
 
         updateProgress(c);
     }
