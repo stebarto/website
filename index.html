@@ -74,13 +74,17 @@
             <div class="game-card">
                 <div class="game-stage">
                     <canvas id="race-canvas" width="640" height="480" aria-label="Mini gioco di corse F1 visto dall'alto"></canvas>
+                    <div class="touch-controls">
+                        <button class="touch-btn" id="btn-left" aria-label="Sterza a sinistra">◀</button>
+                        <button class="touch-btn" id="btn-right" aria-label="Sterza a destra">▶</button>
+                    </div>
                     <div class="game-overlay" id="game-overlay">
                         <div class="overlay-inner">
                             <p class="overlay-kicker" id="overlay-kicker">STEBARTO GP</p>
                             <h3 id="overlay-title">GRAN PREMIO</h3>
                             <p class="overlay-msg" id="overlay-msg">3 giri contro la CPU.<br />Occhio a olio, fango ed erba.</p>
                             <button class="btn btn-red" id="start-btn">▶ START</button>
-                            <p class="overlay-hint">←/→ sterza · ↑ gas · ↓ freno · touch ok</p>
+                            <p class="overlay-hint">←/→ sterza · ↑ gas · ↓ freno · touch: pulsanti ◀ ▶</p>
                         </div>
                     </div>
                     <div class="hud" id="hud" aria-hidden="true">
@@ -112,7 +116,7 @@
                             <li><kbd>↑</kbd> o <kbd>W</kbd> acceleratore</li>
                             <li><kbd>↓</kbd> o <kbd>S</kbd> freno</li>
                             <li><kbd>P</kbd> pausa · <kbd>R</kbd> restart</li>
-                            <li>📱 touch: sinistra/destra dello schermo</li>
+                            <li>📱 touch: pulsanti ◀ ▶, gas automatico</li>
                         </ul>
                     </div>
                 </aside>

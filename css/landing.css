@@ -285,12 +285,50 @@ main { position: relative; z-index: 1; }
     background: #0c0f0c;
     border: 1px solid var(--line);
     overflow: hidden;
+    /* no long-press selection/callout while driving on touch */
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
 }
 #race-canvas {
     display: block;
     width: 100%;
     aspect-ratio: 4 / 3;
     touch-action: none;
+}
+
+.touch-controls {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    display: none;
+    justify-content: space-between;
+    padding: 0.8rem;
+    pointer-events: none;
+}
+.touch-btn {
+    pointer-events: auto;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    border: 1px solid rgba(242, 242, 242, 0.45);
+    background: rgba(10, 10, 12, 0.45);
+    color: var(--white);
+    font-size: 1.5rem;
+    line-height: 1;
+    cursor: pointer;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+    -webkit-tap-highlight-color: transparent;
+}
+.touch-btn:active {
+    background: rgba(225, 6, 0, 0.55);
+    border-color: var(--red-bright);
+}
+@media (hover: none), (pointer: coarse) {
+    .touch-controls { display: flex; }
 }
 
 .game-overlay {
