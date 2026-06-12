@@ -145,7 +145,6 @@
         my = 1.0 - e.clientY / window.innerHeight;
     });
 
-    var visible = true;
     var running = true;
     var start = performance.now();
     var lastT = 0, slowFrames = 0;
@@ -159,8 +158,9 @@
         gl.drawArrays(gl.TRIANGLES, 0, 3);
     }
 
+    // always animating while the page is visible; pause only on tab switch
     function frame(t) {
-        if (!running || !visible) return;
+        if (!running) return;
         // degrade resolution rather than frame rate on weak GPUs
         if (lastT && scale > 0.45) {
             if (t - lastT > 40) {
@@ -175,22 +175,12 @@
     }
     requestAnimationFrame(frame);
 
-    function setActive(on) {
-        if (reducedMotion) return;
-        var was = running && visible;
-        if (on === was) return;
-        if (on) { lastT = 0; requestAnimationFrame(frame); }
-    }
-
-    // don't burn GPU while the hero is scrolled out of view
-    if ("IntersectionObserver" in window) {
-        new IntersectionObserver(function (entries) {
-            visible = entries[0].isIntersecting;
-            setActive(running && visible);
-        }).observe(canvas);
-    }
     document.addEventListener("visibilitychange", function () {
+        var was = running;
         running = !document.hidden;
-        setActive(running && visible);
+        if (!reducedMotion && running && !was) {
+            lastT = 0; // don't let the pause trip the slow-frame detector
+            requestAnimationFrame(frame);
+        }
     });
 })();
