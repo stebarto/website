@@ -522,8 +522,10 @@
     }
 
     if (maxiExit) maxiExit.addEventListener("click", exitMaxi);
+    // leaving fullscreen by any means (ESC, swipe, browser gesture) must also
+    // release the scroll lock — otherwise the page stays stuck until reload
     document.addEventListener("fullscreenchange", function () {
-        if (!document.fullscreenElement) stage.classList.remove("maxi");
+        if (!document.fullscreenElement) exitMaxi();
     });
 
     /* ---------- Turbo ---------- */
