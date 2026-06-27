@@ -107,3 +107,46 @@
     }
 
 })();
+
+    /* -------------------------------------------------------
+       SCROLL HINT — nasconde la freccia dopo il primo scroll
+    ------------------------------------------------------- */
+    var scrollHint = document.querySelector(".scroll-hint");
+    if (scrollHint) {
+        var hintHidden = false;
+        window.addEventListener("scroll", function () {
+            if (!hintHidden && window.scrollY > 80) {
+                hintHidden = true;
+                scrollHint.classList.add("hidden");
+            }
+        }, { passive: true });
+    }
+
+    /* -------------------------------------------------------
+       SCROLL-OUT — anima in uscita gli elementi quando
+       escono dal viewport verso l'alto
+    ------------------------------------------------------- */
+    if (!reduceMotion && "IntersectionObserver" in window) {
+        var outObserver = new IntersectionObserver(function (entries) {
+            entries.forEach(function (entry) {
+                var el = entry.target;
+                if (!entry.isIntersecting) {
+                    // Esce verso l'alto (scrolled past)
+                    var rect = el.getBoundingClientRect();
+                    if (rect.bottom < 0) {
+                        el.classList.add("is-out");
+                    } else {
+                        // Rientra dal basso — rimuove is-out e ri-triggera is-visible
+                        el.classList.remove("is-out");
+                    }
+                } else {
+                    el.classList.remove("is-out");
+                }
+            });
+        }, { threshold: 0 });
+
+        // Osserva solo gli elementi già rivelati (about section)
+        document.querySelectorAll("#about [data-reveal]").forEach(function (el) {
+            outObserver.observe(el);
+        });
+    }

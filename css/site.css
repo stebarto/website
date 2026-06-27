@@ -406,3 +406,73 @@ a { color: inherit; text-decoration: none; }
     cursor: pointer;
 }
 .tetris-restart:hover { opacity: 0.85; }
+
+/* ============================================================
+   SCROLL HINT — freccia pulsante in basso nella prima sezione
+   ============================================================ */
+
+.scroll-hint {
+    position: absolute;
+    bottom: 2.2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 2;
+    color: var(--muted);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.2s, opacity 0.4s;
+    animation: hint-pulse 2.4s ease-in-out infinite;
+    text-decoration: none;
+}
+
+.scroll-hint:hover {
+    color: var(--accent);
+}
+
+/* Scompare una volta che si è scrollato */
+.scroll-hint.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.scroll-hint svg {
+    width: 100%;
+    height: 100%;
+}
+
+@keyframes hint-pulse {
+    0%   { transform: translateX(-50%) translateY(0px);   opacity: 0.45; }
+    50%  { transform: translateX(-50%) translateY(7px);   opacity: 1;    }
+    100% { transform: translateX(-50%) translateY(0px);   opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scroll-hint { animation: none; opacity: 0.6; }
+}
+
+/* ============================================================
+   SCROLL-OUT — animazione in uscita quando l'elemento esce
+   dal viewport verso l'alto
+   ============================================================ */
+
+[data-reveal].is-out {
+    opacity: 0;
+    transform: translateY(-28px);
+    filter: blur(4px);
+    transition:
+        opacity  0.55s cubic-bezier(0.4, 0, 1, 1),
+        transform 0.55s cubic-bezier(0.4, 0, 1, 1),
+        filter   0.4s cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* Il titolo grande si restringe leggermente in uscita */
+.about-title[data-reveal].is-out {
+    transform: translateY(-20px) scale(0.97);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    [data-reveal].is-out { opacity: 1; transform: none; filter: none; }
+}
