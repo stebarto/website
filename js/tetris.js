@@ -53,6 +53,7 @@ const board = [];
 for (let r = 0; r < ROWS; r++) board.push(new Array(COLS).fill(null));
 
 let current = null;
+let gameOver = false;
 
 function randomShapeKey() {
     return SHAPE_KEYS[Math.floor(Math.random() * SHAPE_KEYS.length)];
@@ -77,7 +78,9 @@ function spawnPiece() {
     const col = Math.floor((COLS - shape[0].length) / 2);
     current = { shape: shape, color: def.color, row: 0, col: col };
     if (collides(shape, 0, col)) {
-        current = null; // game over, handled in Task 8
+        current = null;
+        gameOver = true;
+        document.getElementById("tetris-overlay").classList.add("show");
     }
 }
 
@@ -92,6 +95,45 @@ function lockPiece() {
     }
     current = null;
 }
+
+let score = 0;
+let level = 1;
+const scoreEl = document.getElementById("tetris-score");
+const levelEl = document.getElementById("tetris-level");
+
+const LINE_SCORES = [0, 100, 300, 500, 800]; // indexed by lines cleared at once
+
+function clearLines() {
+    let cleared = 0;
+    for (let r = ROWS - 1; r >= 0; r--) {
+        if (board[r].every(function (cell) { return cell !== null; })) {
+            board.splice(r, 1);
+            board.unshift(new Array(COLS).fill(null));
+            cleared++;
+            r++; // re-check this row index since rows shifted down
+        }
+    }
+    if (cleared > 0) {
+        score += LINE_SCORES[cleared] * level;
+        level = 1 + Math.floor(score / 1000);
+        scoreEl.textContent = "SCORE " + score;
+        levelEl.textContent = "LVL " + level;
+        dropInterval = Math.max(150, 800 - (level - 1) * 60);
+    }
+}
+
+function resetGame() {
+    for (let r = 0; r < ROWS; r++) board[r].fill(null);
+    score = 0;
+    level = 1;
+    dropInterval = 800;
+    scoreEl.textContent = "SCORE 0";
+    levelEl.textContent = "LVL 1";
+    gameOver = false;
+    document.getElementById("tetris-overlay").classList.remove("show");
+    spawnPiece();
+}
+document.getElementById("tetris-restart").addEventListener("click", resetGame);
 
 function rotateShape(shape) {
     const rows = shape.length, cols = shape[0].length;
@@ -131,15 +173,16 @@ function rotateCurrent() {
 }
 
 function hardDrop() {
-    if (!current) return;
+    if (!current || gameOver) return;
     while (moveCurrent(1, 0)) { /* keep dropping */ }
     lockPiece();
-    spawnPiece();
+    clearLines();
+    if (!gameOver) spawnPiece();
     lastDrop = performance.now();
 }
 
 document.addEventListener("keydown", function (e) {
-    if (!current) return;
+    if (!current || gameOver) return;
     if (e.key === "ArrowLeft") { moveCurrent(0, -1); e.preventDefault(); }
     else if (e.key === "ArrowRight") { moveCurrent(0, 1); e.preventDefault(); }
     else if (e.key === "ArrowDown") { moveCurrent(1, 0); e.preventDefault(); }
@@ -191,18 +234,19 @@ function render() {
 }
 
 let lastDrop = 0;
-const DROP_INTERVAL_MS = 800;
+let dropInterval = 800;
 
 spawnPiece();
 
 function tick(now) {
-    if (current && now - lastDrop > DROP_INTERVAL_MS) {
+    if (!gameOver && current && now - lastDrop > dropInterval) {
         lastDrop = now;
         if (!collides(current.shape, current.row + 1, current.col)) {
             current.row += 1;
         } else {
             lockPiece();
-            spawnPiece();
+            clearLines();
+            if (!gameOver) spawnPiece();
         }
     }
     render();

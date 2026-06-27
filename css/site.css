@@ -210,3 +210,34 @@ a { color: inherit; text-decoration: none; }
     text-shadow: 0 1px 4px #000;
     pointer-events: none;
 }
+
+.tetris-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    background: rgba(5, 5, 7, 0.85);
+    backdrop-filter: blur(3px);
+    z-index: 2;
+}
+.tetris-overlay.show { display: flex; }
+.tetris-overlay-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.6rem;
+    color: var(--white);
+}
+.tetris-restart {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    letter-spacing: 0.12em;
+    color: var(--bg);
+    background: var(--accent);
+    border: none;
+    padding: 0.7rem 1.4rem;
+    cursor: pointer;
+}
+.tetris-restart:hover { opacity: 0.85; }
