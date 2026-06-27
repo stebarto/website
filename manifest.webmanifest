@@ -1,16 +1,15 @@
 {
-    "name": "Stebarto GP",
-    "short_name": "Stebarto GP",
-    "description": "Disegna la traiettoria, gestisci il turbo. Fino a 4 giocatori.",
+    "name": "Stebarto",
+    "short_name": "Stebarto",
+    "description": "Portfolio in lavorazione — nel frattempo, una partita a Tetris.",
     "start_url": "/",
-    "display": "fullscreen",
-    "orientation": "landscape",
-    "background_color": "#0a0a0c",
-    "theme_color": "#0a0a0c",
+    "display": "browser",
+    "background_color": "#0a0a0f",
+    "theme_color": "#0a0a0f",
     "icons": [
         {
-            "src": "assets/img/logo-stebarto.png",
-            "sizes": "500x500",
+            "src": "assets/img/logo.png",
+            "sizes": "374x225",
             "type": "image/png",
             "purpose": "any"
         }
