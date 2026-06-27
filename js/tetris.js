@@ -93,6 +93,60 @@ function lockPiece() {
     current = null;
 }
 
+function rotateShape(shape) {
+    const rows = shape.length, cols = shape[0].length;
+    const result = [];
+    for (let c = 0; c < cols; c++) {
+        const newRow = [];
+        for (let r = rows - 1; r >= 0; r--) newRow.push(shape[r][c]);
+        result.push(newRow);
+    }
+    return result;
+}
+
+function moveCurrent(dRow, dCol) {
+    if (!current) return false;
+    const newRow = current.row + dRow, newCol = current.col + dCol;
+    if (collides(current.shape, newRow, newCol)) return false;
+    current.row = newRow;
+    current.col = newCol;
+    return true;
+}
+
+function rotateCurrent() {
+    if (!current) return;
+    const rotated = rotateShape(current.shape);
+    if (!collides(rotated, current.row, current.col)) {
+        current.shape = rotated;
+        return;
+    }
+    // simple wall-kick: try shifting one column left or right
+    if (!collides(rotated, current.row, current.col - 1)) {
+        current.shape = rotated;
+        current.col -= 1;
+    } else if (!collides(rotated, current.row, current.col + 1)) {
+        current.shape = rotated;
+        current.col += 1;
+    }
+}
+
+function hardDrop() {
+    if (!current) return;
+    while (moveCurrent(1, 0)) { /* keep dropping */ }
+    lockPiece();
+    spawnPiece();
+    lastDrop = performance.now();
+}
+
+document.addEventListener("keydown", function (e) {
+    if (!current) return;
+    if (e.key === "ArrowLeft") { moveCurrent(0, -1); e.preventDefault(); }
+    else if (e.key === "ArrowRight") { moveCurrent(0, 1); e.preventDefault(); }
+    else if (e.key === "ArrowDown") { moveCurrent(1, 0); e.preventDefault(); }
+    else if (e.key === "ArrowUp") { rotateCurrent(); e.preventDefault(); }
+    else if (e.key === " ") { hardDrop(); e.preventDefault(); }
+});
+
 const cellMeshes = [];
 for (let r = 0; r < ROWS; r++) {
     const rowMeshes = [];
