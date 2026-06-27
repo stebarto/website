@@ -6,20 +6,46 @@
     // ---------- Scroll-reveal ----------
     var revealEls = Array.prototype.slice.call(document.querySelectorAll("[data-reveal]"));
 
+    function isInViewport(el) {
+        var rect = el.getBoundingClientRect();
+        return rect.top < window.innerHeight * 0.85 && rect.bottom > 0;
+    }
+
+    function reveal(el) { el.classList.add("is-visible"); }
+
     if (reduceMotion) {
-        revealEls.forEach(function (el) { el.classList.add("is-visible"); });
-    } else if ("IntersectionObserver" in window) {
-        var revealObserver = new IntersectionObserver(function (entries) {
-            entries.forEach(function (entry) {
-                if (entry.isIntersecting) {
-                    entry.target.classList.add("is-visible");
-                    revealObserver.unobserve(entry.target);
-                }
-            });
-        }, { threshold: 0.2 });
-        revealEls.forEach(function (el) { revealObserver.observe(el); });
+        revealEls.forEach(reveal);
     } else {
-        revealEls.forEach(function (el) { el.classList.add("is-visible"); });
+        // Elements already on screen at load time (e.g. the first section)
+        // must not wait on a scroll-triggered IntersectionObserver callback
+        // that may never fire before the user starts reading.
+        var pending = revealEls.filter(function (el) {
+            if (isInViewport(el)) { reveal(el); return false; }
+            return true;
+        });
+
+        if (pending.length && "IntersectionObserver" in window) {
+            var revealObserver = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        reveal(entry.target);
+                        revealObserver.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.2 });
+            pending.forEach(function (el) { revealObserver.observe(el); });
+        } else {
+            pending.forEach(reveal);
+        }
+
+        // Safety net: never leave content permanently invisible if the
+        // observer doesn't fire for some reason (e.g. an unusual browser
+        // environment) — reveal everything still hidden after a short wait.
+        setTimeout(function () {
+            revealEls.forEach(function (el) {
+                if (!el.classList.contains("is-visible")) reveal(el);
+            });
+        }, 2500);
     }
 
     // ---------- Parallax on the float-dots ----------
