@@ -19,6 +19,20 @@ body {
     font-family: var(--font-display);
     line-height: 1.6;
     overflow-x: clip;
+    position: relative;
+}
+
+/* Single fixed glow backdrop behind the whole page, so there is no visible
+   seam where one section's background met the next. */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background:
+        radial-gradient(circle at 22% 18%, rgba(155, 140, 255, 0.22) 0%, transparent 45%),
+        radial-gradient(circle at 78% 78%, rgba(120, 100, 255, 0.16) 0%, transparent 50%),
+        var(--bg);
 }
 
 a { color: inherit; text-decoration: none; }
@@ -42,18 +56,50 @@ a { color: inherit; text-decoration: none; }
     overflow: hidden;
 }
 
-.page-section::before {
-    content: "";
-    position: absolute;
-    inset: -20%;
-    background: radial-gradient(circle at 30% 35%, var(--accent-glow) 0%, transparent 55%);
-    pointer-events: none;
-    z-index: 0;
+.section-hidden { display: none; }
+
+/* ============ Scroll-reveal ============ */
+
+[data-reveal] {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+[data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
 }
 
-#about { background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%); }
-#game { background: var(--bg); }
-#contact { background: linear-gradient(180deg, var(--bg-2) 0%, var(--bg) 100%); }
+/* ============ Floating decorative dots (parallax-driven) ============ */
+
+.float-dot {
+    --py: 0px;
+    position: absolute;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px 3px var(--accent-glow);
+    pointer-events: none;
+    animation: float-bob 6s ease-in-out infinite;
+    will-change: transform;
+}
+.fd-1 { top: 18%; left: 14%; animation-delay: 0s; }
+.fd-2 { top: 70%; left: 82%; animation-delay: -2s; }
+.fd-3 { top: 38%; left: 86%; animation-delay: -4s; }
+
+/* --py is updated from JS on scroll (parallax); the bob animation layers
+   its own oscillation on top via calc() so the two never fight over the
+   same transform. */
+@keyframes float-bob {
+    0%, 100% { transform: translateY(var(--py)); opacity: 0.7; }
+    50% { transform: translateY(calc(var(--py) - 18px)); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .float-dot { animation: none; }
+    [data-reveal] { transition: none; opacity: 1; transform: none; }
+}
 
 /* ============ Side-dot navigation ============ */
 

@@ -15,7 +15,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
-    <link rel="stylesheet" href="css/site.css?v=1" />
+    <link rel="stylesheet" href="css/site.css?v=2" />
     <script type="importmap">
     {
       "imports": {
@@ -28,20 +28,22 @@
 
     <nav class="side-nav" aria-label="Navigazione sezioni">
         <a class="side-nav-dot" data-target="about" href="#about" aria-label="About"></a>
-        <a class="side-nav-dot" data-target="game" href="#game" aria-label="Game"></a>
         <a class="side-nav-dot" data-target="contact" href="#contact" aria-label="Contact"></a>
     </nav>
 
     <main>
         <section class="page-section" id="about">
+            <span class="float-dot fd-1" aria-hidden="true"></span>
+            <span class="float-dot fd-2" aria-hidden="true"></span>
+            <span class="float-dot fd-3" aria-hidden="true"></span>
             <div class="about-inner">
-                <img class="about-logo" src="assets/img/logo.png" alt="Stebarto" />
-                <p class="about-kicker">// ABOUT</p>
-                <h1 class="about-title">Stebarto<span class="about-dot">.</span></h1>
-                <p class="about-lead">Il sito è in lavorazione. Torna più avanti per vedere tutte le novità.<br />Ma nel frattempo, se vuoi, fatti una partita!</p>
+                <img class="about-logo" data-reveal src="assets/img/logo.png" alt="Stebarto" />
+                <p class="about-kicker" data-reveal>// ABOUT</p>
+                <h1 class="about-title" data-reveal>Stebarto<span class="about-dot">.</span></h1>
+                <p class="about-lead" data-reveal>Il sito è in lavorazione.</p>
             </div>
         </section>
-        <section class="page-section" id="game">
+        <section class="page-section section-hidden" id="game">
             <div class="game-inner">
                 <p class="about-kicker">// GAME</p>
                 <div class="tetris-stage">
@@ -58,16 +60,18 @@
             </div>
         </section>
         <section class="page-section" id="contact">
+            <span class="float-dot fd-1" aria-hidden="true"></span>
+            <span class="float-dot fd-2" aria-hidden="true"></span>
             <div class="contact-inner">
-                <p class="about-kicker">// CONTACT</p>
-                <h2 class="contact-title">Scriviamoci.</h2>
-                <p class="contact-lead">Idee, domande, o solo due chiacchiere — la mail è sempre aperta.</p>
-                <a class="contact-link" href="mailto:info@stebarto.com">info@stebarto.com</a>
+                <p class="about-kicker" data-reveal>// CONTACT</p>
+                <h2 class="contact-title" data-reveal>Scrivimi.</h2>
+                <p class="contact-lead" data-reveal>Idee, domande, o solo due chiacchiere — la mail è sempre aperta.</p>
+                <a class="contact-link" data-reveal href="mailto:info@stebarto.com">info@stebarto.com</a>
             </div>
         </section>
     </main>
 
     <script src="js/nav.js?v=1"></script>
-    <script type="module" src="js/tetris.js?v=1"></script>
+    <script src="js/effects.js?v=1"></script>
 </body>
 </html>
