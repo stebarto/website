@@ -106,8 +106,6 @@
         tick(); // inizializza al load
     }
 
-})();
-
     /* -------------------------------------------------------
        SCROLL HINT — nasconde la freccia dopo il primo scroll
     ------------------------------------------------------- */
@@ -150,3 +148,5 @@
             outObserver.observe(el);
         });
     }
+
+})();
